@@ -1,4 +1,4 @@
-#
+ 
 # firefly Makefile
 # 
 # https://docs.circuitpython.org/en/latest/docs/workflows.html#get
@@ -23,8 +23,14 @@ push: boot.py code.py
 		--upload-file boot.py $(CPURL)/fs/boot.py \
 		--upload-file code.py $(CPURL)/fs/code.py
 
+push-lib: downloads downloads/bundle/lib/neopixel.mpy
+	cd downloads/bundle/lib && \
+	curl $(VERBOSE) -u :$(CIRCUITPY_WEB_API_PASSWORD) --location --location-trusted \
+		--upload-file neopixel.mpy $(CPURL)/fs/lib/neopixel.mpy
+
 get-cp-info:
-	curl $(VERBOSE) --location --location-trusted \
+	test -d downloads || mkdir downloads
+	cd downloads && curl $(VERBOSE) --location --location-trusted \
 		-O $(CPURL)/cp/devices.json \
 		-O $(CPURL)/cp/version.json
 
@@ -33,5 +39,13 @@ get-cp-info:
 	printf "\n# ignore the downloads directory\ndownloads\n" >> .gitignore
 	printf "\n# ignore version.py that updates each push\nversion.py\n" >> .gitignore
 
+downloads:
+	test -d downloads || mkdir downloads
+	cd downloads && curl --location --progress-bar \
+		-O https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/download/20221122/adafruit-circuitpython-bundle-8.x-mpy-20221122.zip \
+		-O https://downloads.circuitpython.org/bin/adafruit_feather_huzzah32/en_US/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.0.0-beta.4.bin && \
+		unzip adafruit-circuitpython-bundle-8.x-mpy-20221122.zip && \
+		ln -s adafruit-circuitpython-bundle-8.x-mpy-20221122 bundle
+
 clean:
-	rm -fr __pycache__ version.py devices.json version.json
+	rm -fr __pycache__ version.py downloads
