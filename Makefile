@@ -11,7 +11,7 @@ CPURL=http://circuitpython.local
 CIRCUITPY_WEB_API_PASSWORD=REDACTED_FOR_GITHUB
 
 # Comment out if you don't want to see curl activity
-#VERBOSE=-v
+VERBOSE=-v
 
 # No config below this line
 all: push .gitignore
@@ -30,7 +30,8 @@ get-cp-info:
 
 .gitignore:
 	curl https://www.toptal.com/developers/gitignore/api/python,circuitpython,git,virtualenv,macos,vim,pycharm -o .gitignore
-	printf "\n# Also ignore the downloads directory\ndownloads\n" >> .gitignore
+	printf "\n# ignore the downloads directory\ndownloads\n" >> .gitignore
+	printf "\n# ignore version.py that updates each push\nversion.py\n" >> .gitignore
 
 clean:
 	rm -fr __pycache__ version.py devices.json version.json
