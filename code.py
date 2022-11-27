@@ -22,13 +22,13 @@ strand_brightness: float = 0.1
 brightness_levels = (0.25, 0.3, 0.15)  # balance the colors better so white doesn't appear blue-tinged
 
 # Length of various timers
-# Floats are in seconds
 # Integers are in microseconds (1000ths)
 move_frequency_min: int = 500
 move_frequency_max: int = 5000
-strand_on_time: float = 0.1
+strand_blink_pattern = [50, 300, 100, 200, 50]
 strand_min_off_time: int = 1000
 strand_max_off_time: int = 2000
+strand_blink_max: int = 2
 
 # No user config below this point
 
@@ -74,32 +74,56 @@ led.direction = digitalio.Direction.OUTPUT
 # setup strand NEOPIXELs
 print(f' - NeoPixel strand size {strand_length} on {strand_pin}')
 strand_pixels = neopixel.NeoPixel(strand_pin, strand_length)
-# brightness=strand_brightness)
 
+# Initialize counters and clocks
 next_move_clock: int = 0
 next_strand_clock: int = 0
-next_stat_clock: int = 0
+next_stat_clock: int = supervisor.ticks_ms() + 10000
 strand_direction: int = 1
-strand_cursor: int = 0
+strand_cursor: int = random.randrange(0, len(strand_pixels))
 start_time: int = time.time()
+last_loop_time: int = start_time
 loop_count: int = 0
+strand_blink_count: int = 0
 
 print(' - Running LED test.')
 for c in color_wheel:
     strand_pixels.fill(c)
     watch_dog.feed()
-    time.sleep(strand_on_time)
+    time.sleep(0.1)
 strand_pixels.fill(OFF)
 
 print(' - Entering main event loop.')
 while True:
     clock = supervisor.ticks_ms()
+    watch_dog.feed()
+    led.value = not led.value
     loop_count += 1
 
     # Print the average runs per second ever 10secs
     if clock > next_stat_clock:
         next_stat_clock: int = clock + 10000
-        print(f" - Loop #{loop_count} at {loop_count / (time.time() - start_time)} loops/second")
+        print(f" - Running {time.time() - start_time}s at {loop_count / (time.time() - last_loop_time)} loops/second")
+        loop_count: int = 0
+        last_loop_time = time.time()
+
+    # Flicker pixels if clock is expired
+    if clock > next_strand_clock:
+        # If there's still blink pattern to use, do so.
+        #  Otherwise reset
+        if strand_blink_count < len(strand_blink_pattern):
+            next_strand_clock = clock + strand_blink_pattern[strand_blink_count]
+            strand_blink_count += 1
+        else:
+            next_strand_clock = clock + random.randrange(strand_min_off_time, strand_max_off_time)
+            strand_blink_count = 0
+
+        # Handling blinking the light
+        if strand_pixels[strand_cursor] == OFF:
+            strand_pixels[strand_cursor] = FIREFLY_GREEN
+        else:
+            strand_pixels[strand_cursor] = OFF
+        continue  # Don't move the firefly while in the flash pattern
 
     # Adjust location if clock is expired
     if clock > next_move_clock:
@@ -107,6 +131,7 @@ while True:
 
         # Blank all the pixels
         strand_pixels.fill(OFF)
+        strand_blink_count = 0
 
         # Decide if we switch direction
         if random.randrange(0, 2) == 0:
@@ -121,20 +146,3 @@ while True:
         # Move the firefly
         print(f'   - Moving cursor={strand_cursor} direction={strand_direction} max={len(strand_pixels)}')
         strand_cursor = (strand_cursor + strand_direction) % len(strand_pixels)
-
-    # Flicker pixels if clock is expired
-    if clock > next_strand_clock:
-        next_strand_clock = clock + random.randrange(strand_min_off_time, strand_max_off_time)
-
-        strand_pixels[strand_cursor] = FIREFLY_GREEN
-        time.sleep(strand_on_time)
-        strand_pixels[strand_cursor] = OFF
-        time.sleep(3 * strand_on_time)
-        strand_pixels[strand_cursor] = FIREFLY_GREEN
-        time.sleep(strand_on_time)
-        strand_pixels[strand_cursor] = OFF
-
-    # Increment heartbeat LED and feed the watchdog
-    led.value = not led.value
-    watch_dog.feed()
-    time.sleep(0.1)
