@@ -17,24 +17,14 @@ VERBOSE=-v
 # No config below this line
 all: install .gitignore
 
-install: .install-version.py .install-boot.py .install-code.py
+install: .install-version.py .install-boot.py .install-code.py .install-firefly.py
 
 version.py: code.py
 	date -r code.py "+__version__ = %'%Y-%m-%d %H:%M:%S%'" > version.py
 
-.install-version.py: version.py
+.install-%.py: %.py
 	curl $(VERBOSE) -u :$(CIRCUITPY_WEB_API_PASSWORD) --create-dirs --location --location-trusted \
-		--upload-file version.py $(CPURL)/fs/version.py \
-	  	&& touch $(@)
-
-.install-boot.py: boot.py
-	curl $(VERBOSE) -u :$(CIRCUITPY_WEB_API_PASSWORD) --create-dirs --location --location-trusted \
-		--upload-file boot.py $(CPURL)/fs/boot.py \
-	  	&& touch $(@)
-
-.install-code.py: code.py
-	curl $(VERBOSE) -u :$(CIRCUITPY_WEB_API_PASSWORD) --create-dirs --location --location-trusted \
-		--upload-file code.py $(CPURL)/fs/code.py \
+		--upload-file $< $(CPURL)/fs/$< \
 	  	&& touch $(@)
 
 install-lib: downloads downloads/bundle/lib/neopixel.mpy downloads/bundle/lib/adafruit_minimqtt/adafruit_minimqtt.mpy \
