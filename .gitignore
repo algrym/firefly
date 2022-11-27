@@ -328,6 +328,11 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+### Python Patch ###
+# Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration
+poetry.toml
+
+
 ### Vim ###
 # Swap
 [._]*.s[a-v][a-z]
@@ -366,5 +371,8 @@ pip-selfcheck.json
 # ignore the downloads directory
 downloads
 
-# ignore version.py that updates each push
+# ignore version.py that updates each install
 version.py
+
+# ignore .install-* files that tracks installation
+.install-*
