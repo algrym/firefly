@@ -10,6 +10,8 @@ import board
 import digitalio
 import neopixel
 import supervisor
+import microcontroller
+import watchdog
 
 import version
 
@@ -38,7 +40,7 @@ RED = fancyled.gamma_adjust(fancyled.CRGB(255, 0, 0), brightness=brightness_leve
 ORANGE = fancyled.gamma_adjust(fancyled.CRGB(255, 165, 0), brightness=brightness_levels).pack()
 YELLOW = fancyled.gamma_adjust(fancyled.CRGB(255, 255, 0), brightness=brightness_levels).pack()
 GREEN = fancyled.gamma_adjust(fancyled.CRGB(0, 255, 0), brightness=brightness_levels).pack()
-FIREFLY_GREEN = fancyled.gamma_adjust(fancyled.CRGB(0, 255, 175), brightness=brightness_levels).pack()
+FIREFLY_GREEN = fancyled.gamma_adjust(fancyled.CRGB(150, 255, 125), brightness=brightness_levels).pack()
 BLUE = fancyled.gamma_adjust(fancyled.CRGB(0, 0, 255), brightness=brightness_levels).pack()
 PURPLE = fancyled.gamma_adjust(fancyled.CRGB(128, 0, 128), brightness=brightness_levels).pack()
 WHITE = fancyled.gamma_adjust(fancyled.CRGB(255, 255, 255), brightness=brightness_levels).pack()
@@ -47,12 +49,19 @@ OFF = (0, 0, 0)
 color_wheel = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, WHITE]
 
 
-def all_off():
+def all_off()::watchdog
     # callback to turn everything off on exit
-    print(' - Exiting: all pixels off.')
+    print(' - Watchdog: standing down.')
+    watchdog.deinit()
+    print(' - Exiting: setting all pixels off.')
     strand_pixels.fill(OFF)
     sys.exit(0)
 
+# Setup hardware watchdog in case things go wrong
+watch_dog = microcontroller.watchdog
+watch_dog.timeout = 5
+watch_dog.mode = watchdog.WatchDogMode.RAISE
+print(f' - Watchdog: feed me every {watch_dog.timeout} seconds or face {watch_dog.mode}')
 
 # turn everything off on exit
 atexit.register(all_off)
@@ -62,7 +71,7 @@ led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT
 
 # setup strand NEOPIXELs
-print(f" - NeoPixel strand size {strand_length} on {strand_pin}")
+print(f' - NeoPixel strand size {strand_length} on {strand_pin}')
 strand_pixels = neopixel.NeoPixel(strand_pin, strand_length)
 # brightness=strand_brightness)
 
@@ -83,6 +92,10 @@ while True:
     # Adjust location if clock is expired
     if clock > next_move_clock:
         next_move_clock = clock + random.randrange(move_frequency_min, move_frequency_max)
+
+        # Increment heartbeat LED and feed the watchdog
+        led.value = not led.value
+        watch_dog.feed()
 
         # Blank all the pixels
         strand_pixels.fill(OFF)
@@ -108,6 +121,4 @@ while True:
         time.sleep(strand_on_time)
         strand_pixels[strand_cursor] = OFF
 
-    # Increment heartbeat LED
-    led.value = clock % 50
     time.sleep(0.1)
