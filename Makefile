@@ -19,7 +19,7 @@ all: install .gitignore
 
 install: .install-version.py .install-boot.py .install-code.py .install-firefly.py
 
-version.py: code.py
+version.py: code.py firefly.py
 	date -r code.py "+__version__ = %'%Y-%m-%d %H:%M:%S%'" > version.py
 
 .install-%.py: %.py
