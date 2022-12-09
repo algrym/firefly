@@ -16,7 +16,7 @@ import watchdog
 import version
 
 # Config variables
-strand_pin = board.GP0
+strand_pin = board.D21
 strand_length: int = 50
 strand_brightness: float = 0.1
 brightness_levels = (0.25, 0.3, 0.15)  # balance the colors better so white doesn't appear blue-tinged
