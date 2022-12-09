@@ -31,6 +31,8 @@ install-lib: downloads downloads/bundle/lib/neopixel.mpy downloads/bundle/lib/ad
 		downloads/bundle/lib/adafruit_fancyled/adafruit_fancyled.mpy
 	cd downloads/bundle/lib && \
 	curl $(VERBOSE) -u :$(CIRCUITPY_WEB_API_PASSWORD) --create-dirs --location --location-trusted \
+		--request PUT $(CPURL)/fs/lib/adafruit_fancyled \
+		--request PUT $(CPURL)/fs/lib/adafruit_minimqtt \
 		--upload-file adafruit_fancyled/adafruit_fancyled.mpy $(CPURL)/fs/lib/adafruit_fancyled/adafruit_fancyled.mpy \
 		--upload-file adafruit_fancyled/__init__.py $(CPURL)/fs/lib/adafruit_fancyled/__init__.py \
 		--upload-file adafruit_minimqtt/adafruit_minimqtt.mpy $(CPURL)/fs/lib/adafruit_minimqtt/adafruit_minimqtt.mpy \
