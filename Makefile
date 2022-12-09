@@ -38,6 +38,10 @@ install-lib: downloads downloads/bundle/lib/neopixel.mpy downloads/bundle/lib/ad
 		--upload-file adafruit_minimqtt/__init__.py $(CPURL)/fs/lib/adafruit_minimqtt/__init__.py \
 		--upload-file neopixel.mpy $(CPURL)/fs/lib/neopixel.mpy
 
+install-circuitpython: downloads downloads/adafruit-circuitpython-feather_m0_express-en_US-7.3.3.uf2
+	esptool.py --port /dev/tty.usbserial-* write_flash -z 0x0 \
+    	~/PycharmProjects/firefly/downloads/adafruit-circuitpython-feather_m0_express-en_US-7.3.3.uf2
+
 get-cp-info:
 	test -d downloads || mkdir downloads
 	cd downloads && curl $(VERBOSE) --location --location-trusted \
