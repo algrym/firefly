@@ -9,7 +9,10 @@
 CPURL := $(if $(CPURL),$(CPURL),http://circuitpython.local)
 
 # the web api login password
-CIRCUITPY_WEB_API_PASSWORD=REDACTED_FOR_GITHUB
+CIRCUITPY_WEB_API_PASSWORD := $(if $(CIRCUITPY_WEB_API_PASSWORD),$(CIRCUITPY_WEB_API_PASSWORD),REDACTED_FOR_GITHUB)
+
+# Path to local serial port for ESPTool
+CPPORT := $(if $(CPPORT),$(CPPORT),/dev/tty.usbserial-*)
 
 # Comment out if you don't want to see curl activity
 VERBOSE=-v
@@ -31,8 +34,6 @@ install-lib: downloads downloads/bundle/lib/neopixel.mpy downloads/bundle/lib/ad
 		downloads/bundle/lib/adafruit_fancyled/adafruit_fancyled.mpy
 	cd downloads/bundle/lib && \
 	curl $(VERBOSE) -u :$(CIRCUITPY_WEB_API_PASSWORD) --create-dirs --location --location-trusted \
-		--request PUT $(CPURL)/fs/lib/adafruit_fancyled \
-		--request PUT $(CPURL)/fs/lib/adafruit_minimqtt \
 		--upload-file adafruit_fancyled/adafruit_fancyled.mpy $(CPURL)/fs/lib/adafruit_fancyled/adafruit_fancyled.mpy \
 		--upload-file adafruit_fancyled/__init__.py $(CPURL)/fs/lib/adafruit_fancyled/__init__.py \
 		--upload-file adafruit_minimqtt/adafruit_minimqtt.mpy $(CPURL)/fs/lib/adafruit_minimqtt/adafruit_minimqtt.mpy \
@@ -41,8 +42,8 @@ install-lib: downloads downloads/bundle/lib/neopixel.mpy downloads/bundle/lib/ad
 		--upload-file neopixel.mpy $(CPURL)/fs/lib/neopixel.mpy
 
 install-circuitpython: downloads downloads/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.0.0-beta.4.bin
-	esptool.py --port /dev/tty.usbserial-* erase_flash
-	esptool.py --port /dev/tty.usbserial-* write_flash -z 0x0 \
+	esptool.py --port $(CPPORT) erase_flash
+	esptool.py --port $(CPPORT) write_flash -z 0x0 \
     	~/PycharmProjects/firefly/downloads/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.0.0-beta.4.bin
 
 get-cp-info:
