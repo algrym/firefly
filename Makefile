@@ -51,7 +51,10 @@ install-circuitpython: downloads
 		write_flash -z 0x0 \
 		downloads/adafruit-circuitpython-${CIRCUIT_PYTHON_BOARD}-en_US-$(CIRCUIT_PYTHON_VER).${CIRCUIT_PYTHON_EXT}
 
- install-lib: downloads downloads/bundle/lib/neopixel.mpy downloads/bundle/lib/adafruit_minimqtt/adafruit_minimqtt.mpy \
+# TODO: this won't create directories on the device, unfortunately
+install-lib: downloads \
+	downloads/bundle/lib/neopixel.mpy \
+	downloads/bundle/lib/adafruit_minimqtt/adafruit_minimqtt.mpy \
  	downloads/bundle/lib/adafruit_fancyled/adafruit_fancyled.mpy
 	cd downloads/bundle/lib && \
 	curl $(VERBOSE) -u :$(CIRCUITPY_WEB_API_PASSWORD) --create-dirs --location --location-trusted \
