@@ -14,6 +14,5 @@ pyftdi==0.55.0
 pyserial==3.5
 pyusb==1.2.1
 typing_extensions==4.8.0
-websocket==0.2.1
 zope.event==5.0
 zope.interface==6.1
