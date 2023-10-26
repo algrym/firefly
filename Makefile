@@ -1,5 +1,5 @@
- 
-# firefly Makefile
+# 
+# Firefly Makefile for huzzah32
 # 
 # https://docs.circuitpython.org/en/latest/docs/workflows.html#get
 #
@@ -14,6 +14,17 @@ CIRCUITPY_WEB_API_PASSWORD=REDACTED_FOR_GITHUB
 # Comment out if you don't want to see curl activity
 VERBOSE=-v
 
+# Flags for esptool.py
+ESPTOOL_FLAGS=--port /dev/tty.usbserial-*
+
+# Version information for Circuitpython and Libraries
+CIRCUIT_PYTHON_BOARD=adafruit_feather_huzzah32
+CIRCUIT_PYTHON_EXT=bin
+#CIRCUIT_PYTHON_EXT=uf2
+CIRCUIT_PYTHON_VER=8.2.7
+CIRCUIT_PYTHON_LIB_VER=8.x
+CIRCUIT_PYTHON_LIB_DATE=20231024
+
 # No config below this line
 all: install .gitignore
 
@@ -27,8 +38,16 @@ version.py: code.py firefly.py
 		--upload-file $< $(CPURL)/fs/$< \
 	  	&& touch $(@)
 
-install-lib: downloads downloads/bundle/lib/neopixel.mpy downloads/bundle/lib/adafruit_minimqtt/adafruit_minimqtt.mpy \
-		downloads/bundle/lib/adafruit_fancyled/adafruit_fancyled.mpy
+install-wipe-huzzah32:
+	esptool.py ${ESPTOOL_FLAGS} erase_flash
+
+install-circuitpython: downloads
+	esptool.py ${ESPTOOL_FLAGS} \
+		write_flash -z 0x0 \
+		downloads/adafruit-circuitpython-${CIRCUIT_PYTHON_BOARD}-en_US-$(CIRCUIT_PYTHON_VER).${CIRCUIT_PYTHON_EXT}
+
+ install-lib: downloads downloads/bundle/lib/neopixel.mpy downloads/bundle/lib/adafruit_minimqtt/adafruit_minimqtt.mpy \
+ 	downloads/bundle/lib/adafruit_fancyled/adafruit_fancyled.mpy
 	cd downloads/bundle/lib && \
 	curl $(VERBOSE) -u :$(CIRCUITPY_WEB_API_PASSWORD) --create-dirs --location --location-trusted \
 		--upload-file adafruit_fancyled/adafruit_fancyled.mpy $(CPURL)/fs/lib/adafruit_fancyled/adafruit_fancyled.mpy \
@@ -37,6 +56,7 @@ install-lib: downloads downloads/bundle/lib/neopixel.mpy downloads/bundle/lib/ad
 		--upload-file adafruit_minimqtt/matcher.mpy $(CPURL)/fs/lib/adafruit_minimqtt/matcher.mpy \
 		--upload-file adafruit_minimqtt/__init__.py $(CPURL)/fs/lib/adafruit_minimqtt/__init__.py \
 		--upload-file neopixel.mpy $(CPURL)/fs/lib/neopixel.mpy
+	
 
 get-cp-info:
 	test -d downloads || mkdir downloads
@@ -50,14 +70,19 @@ get-cp-info:
 	printf "\n# ignore version.py that updates each install\nversion.py\n" >> .gitignore
 	printf "\n# ignore .install-* files that tracks installation\n.install-*\n" >> .gitignore
 
-downloads:
+downloads: \
+	downloads/adafruit-circuitpython-${CIRCUIT_PYTHON_BOARD}-en_US-$(CIRCUIT_PYTHON_VER).${CIRCUIT_PYTHON_EXT} \
+	downloads/adafruit-circuitpython-bundle-$(CIRCUIT_PYTHON_LIB_VER)-mpy-$(CIRCUIT_PYTHON_LIB_DATE).zip
+
+downloads/adafruit-circuitpython-bundle-$(CIRCUIT_PYTHON_LIB_VER)-mpy-$(CIRCUIT_PYTHON_LIB_DATE).zip:
 	test -d downloads || mkdir downloads
-	cd downloads && curl --location --progress-bar \
-		-O https://downloads.circuitpython.org/bin/feather_m0_express/en_US/adafruit-circuitpython-feather_m0_express-en_US-7.3.3.uf2 \
-		-O https://downloads.circuitpython.org/bin/adafruit_feather_huzzah32/en_US/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.0.0-beta.4.bin \
-		-O https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/download/20221122/adafruit-circuitpython-bundle-8.x-mpy-20221122.zip \
-		&& unzip adafruit-circuitpython-bundle-8.x-mpy-20221122.zip && \
-		ln -s adafruit-circuitpython-bundle-8.x-mpy-20221122 bundle
+	curl $(VERBOSE) --location https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/download/$(CIRCUIT_PYTHON_LIB_DATE)/adafruit-circuitpython-bundle-$(CIRCUIT_PYTHON_LIB_VER)-mpy-$(CIRCUIT_PYTHON_LIB_DATE).zip -o $(@)
+	unzip $(@) -d downloads/
+	cd downloads && ln -sf adafruit-circuitpython-bundle-$(CIRCUIT_PYTHON_LIB_VER)-mpy-$(CIRCUIT_PYTHON_LIB_DATE) bundle
+
+downloads/adafruit-circuitpython-${CIRCUIT_PYTHON_BOARD}-en_US-$(CIRCUIT_PYTHON_VER).${CIRCUIT_PYTHON_EXT}:
+	test -d downloads || mkdir downloads
+	curl $(VERBOSE) --location https://downloads.circuitpython.org/bin/${CIRCUIT_PYTHON_BOARD}/en_US/adafruit-circuitpython-${CIRCUIT_PYTHON_BOARD}-en_US-$(CIRCUIT_PYTHON_VER).${CIRCUIT_PYTHON_EXT} -o $(@)
 
 clean:
 	rm -fr __pycache__ version.py downloads .install-*.py
