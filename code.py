@@ -2,7 +2,6 @@
 # code.py
 import atexit
 import random
-import sys
 import time
 
 import adafruit_fancyled.adafruit_fancyled as fancyled
@@ -16,7 +15,7 @@ import watchdog
 import version
 
 # Config variables
-strand_pin = board.D21
+strand_pin = board.A0
 strand_length: int = 50
 strand_brightness: float = 0.1
 brightness_levels = (0.25, 0.3, 0.15)  # balance the colors better so white doesn't appear blue-tinged
@@ -58,7 +57,7 @@ def all_off():
     if supervisor.runtime.serial_connected:
         print(' - Exiting: setting all pixels off.')
     strand_pixels.fill(OFF)
-    sys.exit(0)
+    supervisor.reload()
 
 
 # Setup hardware watchdog in case things go wrong
@@ -86,7 +85,7 @@ next_strand_clock: int = 0
 next_stat_clock: int = supervisor.ticks_ms() + 10000
 strand_direction: int = 1
 strand_cursor: int = random.randrange(0, len(strand_pixels))
-start_time: int = time.time()
+start_time: int = int(time.time())
 last_loop_time: int = start_time
 loop_count: int = 0
 strand_blink_count: int = 0
@@ -114,7 +113,7 @@ while True:
             print(
                 f" - Running {time.time() - start_time}s at {loop_count / (time.time() - last_loop_time)} loops/second")
         loop_count: int = 0
-        last_loop_time = time.time()
+        last_loop_time = int(time.time())
 
     # Flicker pixels if clock is expired
     if clock > next_strand_clock:
