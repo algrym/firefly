@@ -15,7 +15,7 @@ CIRCUITPY_WEB_API_PASSWORD := $(if $(CIRCUITPY_WEB_API_PASSWORD),$(CIRCUITPY_WEB
 CPPORT := $(if $(CPPORT),$(CPPORT),/dev/tty.usbserial-*)
 
 # Comment out if you don't want to see curl activity
-VERBOSE := $(if $(VERBOSE), $(VERBOSE),'')
+VERBOSE := $(if $(VERBOSE), $(VERBOSE),)
 
 # Flags for esptool.py
 ESPTOOL_FLAGS=--port /dev/tty.usbserial-*
@@ -63,11 +63,6 @@ install-circuitpython: downloads
 		--upload-file neopixel.mpy $(CPURL)/fs/lib/neopixel.mpy
 	
 
-install-circuitpython: downloads downloads/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.0.0-beta.4.bin
-	esptool.py --port $(CPPORT) erase_flash
-	esptool.py --port $(CPPORT) write_flash -z 0x0 \
-    	~/PycharmProjects/firefly/downloads/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.0.0-beta.4.bin
-
 get-cp-info:
 	test -d downloads || mkdir downloads
 	cd downloads && curl $(VERBOSE) --location --location-trusted \
@@ -93,6 +88,9 @@ downloads/adafruit-circuitpython-bundle-$(CIRCUIT_PYTHON_LIB_VER)-mpy-$(CIRCUIT_
 downloads/adafruit-circuitpython-${CIRCUIT_PYTHON_BOARD}-en_US-$(CIRCUIT_PYTHON_VER).${CIRCUIT_PYTHON_EXT}:
 	test -d downloads || mkdir downloads
 	curl $(VERBOSE) --location https://downloads.circuitpython.org/bin/${CIRCUIT_PYTHON_BOARD}/en_US/adafruit-circuitpython-${CIRCUIT_PYTHON_BOARD}-en_US-$(CIRCUIT_PYTHON_VER).${CIRCUIT_PYTHON_EXT} -o $(@)
+
+requirements.txt:
+	pip freeze > $(@)
 
 clean:
 	rm -fr __pycache__ version.py downloads .install-*.py
