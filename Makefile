@@ -9,7 +9,10 @@
 CPURL := $(if $(CPURL),$(CPURL),http://circuitpython.local)
 
 # the web api login password
-CIRCUITPY_WEB_API_PASSWORD=REDACTED_FOR_GITHUB
+CIRCUITPY_WEB_API_PASSWORD := $(if $(CIRCUITPY_WEB_API_PASSWORD),$(CIRCUITPY_WEB_API_PASSWORD),REDACTED_FOR_GITHUB)
+
+# Path to local serial port for ESPTool
+CPPORT := $(if $(CPPORT),$(CPPORT),/dev/tty.usbserial-*)
 
 # Comment out if you don't want to see curl activity
 VERBOSE=-v
@@ -57,6 +60,11 @@ install-circuitpython: downloads
 		--upload-file adafruit_minimqtt/__init__.py $(CPURL)/fs/lib/adafruit_minimqtt/__init__.py \
 		--upload-file neopixel.mpy $(CPURL)/fs/lib/neopixel.mpy
 	
+
+install-circuitpython: downloads downloads/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.0.0-beta.4.bin
+	esptool.py --port $(CPPORT) erase_flash
+	esptool.py --port $(CPPORT) write_flash -z 0x0 \
+    	~/PycharmProjects/firefly/downloads/adafruit-circuitpython-adafruit_feather_huzzah32-en_US-8.0.0-beta.4.bin
 
 get-cp-info:
 	test -d downloads || mkdir downloads

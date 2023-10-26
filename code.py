@@ -32,8 +32,9 @@ strand_blink_max: int = 2
 
 # No user config below this point
 
-print("Ƹ̵̡Ӝ̵̨̄Ʒ firefly - github.com/algrym/firefly/code.py -", version.__version__)
-print(f" - Adafruit FancyLed v{fancyled.__version__}")
+if supervisor.runtime.serial_connected:
+    print("Ƹ̵̡Ӝ̵̨̄Ʒ firefly - github.com/algrym/firefly/code.py -", version.__version__)
+    print(f" - Adafruit FancyLed v{fancyled.__version__}")
 
 # Color constants
 RED = fancyled.gamma_adjust(fancyled.CRGB(255, 0, 0), brightness=brightness_levels).pack()
@@ -51,9 +52,11 @@ color_wheel = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, WHITE]
 
 def all_off():
     # callback to turn everything off on exit
-    print(' - Watchdog: standing down.')
+    if supervisor.runtime.serial_connected:
+        print(' - Watchdog: standing down.')
     watch_dog.deinit()
-    print(' - Exiting: setting all pixels off.')
+    if supervisor.runtime.serial_connected:
+        print(' - Exiting: setting all pixels off.')
     strand_pixels.fill(OFF)
     sys.exit(0)
 
@@ -62,7 +65,8 @@ def all_off():
 watch_dog = microcontroller.watchdog
 watch_dog.timeout = 5
 watch_dog.mode = watchdog.WatchDogMode.RESET
-print(f' - Watchdog: feed me every {watch_dog.timeout} seconds or face {watch_dog.mode}')
+if supervisor.runtime.serial_connected:
+    print(f' - Watchdog: feed me every {watch_dog.timeout} seconds or face {watch_dog.mode}')
 
 # turn everything off on exit
 atexit.register(all_off)
@@ -72,7 +76,8 @@ led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT
 
 # setup strand NEOPIXELs
-print(f' - NeoPixel strand size {strand_length} on {strand_pin}')
+if supervisor.runtime.serial_connected:
+    print(f' - NeoPixel strand size {strand_length} on {strand_pin}')
 strand_pixels = neopixel.NeoPixel(strand_pin, strand_length)
 
 # Initialize counters and clocks
@@ -86,14 +91,16 @@ last_loop_time: int = start_time
 loop_count: int = 0
 strand_blink_count: int = 0
 
-print(' - Running LED test.')
+if supervisor.runtime.serial_connected:
+    print(' - Running LED test.')
 for c in color_wheel:
     strand_pixels.fill(c)
     watch_dog.feed()
     time.sleep(0.1)
 strand_pixels.fill(OFF)
 
-print(' - Entering main event loop.')
+if supervisor.runtime.serial_connected:
+    print(' - Entering main event loop.')
 while True:
     clock = supervisor.ticks_ms()
     watch_dog.feed()
@@ -103,7 +110,9 @@ while True:
     # Print the average runs per second ever 10secs
     if clock > next_stat_clock:
         next_stat_clock: int = clock + 10000
-        print(f" - Running {time.time() - start_time}s at {loop_count / (time.time() - last_loop_time)} loops/second")
+        if supervisor.runtime.serial_connected:
+            print(
+                f" - Running {time.time() - start_time}s at {loop_count / (time.time() - last_loop_time)} loops/second")
         loop_count: int = 0
         last_loop_time = time.time()
 
@@ -144,5 +153,6 @@ while True:
             strand_direction = -1
 
         # Move the firefly
-        print(f'   - Moving cursor={strand_cursor} direction={strand_direction} max={len(strand_pixels)}')
+        if supervisor.runtime.serial_connected:
+            print(f'   - Moving cursor={strand_cursor} direction={strand_direction} max={len(strand_pixels)}')
         strand_cursor = (strand_cursor + strand_direction) % len(strand_pixels)
