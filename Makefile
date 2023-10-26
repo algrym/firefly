@@ -15,15 +15,17 @@ CIRCUITPY_WEB_API_PASSWORD := $(if $(CIRCUITPY_WEB_API_PASSWORD),$(CIRCUITPY_WEB
 CPPORT := $(if $(CPPORT),$(CPPORT),/dev/tty.usbserial-*)
 
 # Comment out if you don't want to see curl activity
-VERBOSE=-v
+VERBOSE := $(if $(VERBOSE), $(VERBOSE),'')
 
 # Flags for esptool.py
 ESPTOOL_FLAGS=--port /dev/tty.usbserial-*
 
-# Version information for Circuitpython and Libraries
+# information for downloads
 CIRCUIT_PYTHON_BOARD=adafruit_feather_huzzah32
-CIRCUIT_PYTHON_EXT=bin
+#   use "bin" for serial installs like ESP32
+#   use "uf2" for filesystem installs like Pi Pico
 #CIRCUIT_PYTHON_EXT=uf2
+CIRCUIT_PYTHON_EXT=bin
 CIRCUIT_PYTHON_VER=8.2.7
 CIRCUIT_PYTHON_LIB_VER=8.x
 CIRCUIT_PYTHON_LIB_DATE=20231024
