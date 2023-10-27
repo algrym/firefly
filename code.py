@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # code.py
+# """python code to drive proton pack hardware"""
 import atexit
 import random
 import time
@@ -22,13 +23,13 @@ brightness_levels = (0.25, 0.3, 0.15)  # balance the colors better so white does
 
 # Length of various timers
 # Integers are in microseconds (1000ths)
-move_frequency_min: int = 500
-move_frequency_max: int = 5000
-strand_blink_pattern = [50, 300, 100, 200, 50]
-strand_min_off_time: int = 1000
-strand_max_off_time: int = 2000
-strand_blink_max: int = 2
-strand_init_delay: float = 0.2
+MOVE_FREQUENCY_MIN: int = 500
+MOVE_FREQUENCY_MAX: int = 5000
+STRAND_BLINK_PATTERN = [50, 300, 100, 200, 50]
+STRAND_MIN_OFF_TIME: int = 1000
+STRAND_MAX_OFF_TIME: int = 2000
+STRAND_BLINK_MAX: int = 2
+STRAND_INIT_DELAY: float = 0.2
 
 # No user config below this point
 
@@ -96,7 +97,7 @@ if supervisor.runtime.serial_connected:
 for c in color_wheel:
     strand_pixels.fill(c)
     watch_dog.feed()
-    time.sleep(strand_init_delay)
+    time.sleep(STRAND_INIT_DELAY)
 strand_pixels.fill(OFF)
 
 if supervisor.runtime.serial_connected:
@@ -120,11 +121,11 @@ while True:
     if clock > next_strand_clock:
         # If there's still blink pattern to use, do so.
         #  Otherwise reset
-        if strand_blink_count < len(strand_blink_pattern):
-            next_strand_clock = clock + strand_blink_pattern[strand_blink_count]
+        if strand_blink_count < len(STRAND_BLINK_PATTERN):
+            next_strand_clock = clock + STRAND_BLINK_PATTERN[strand_blink_count]
             strand_blink_count += 1
         else:
-            next_strand_clock = clock + random.randrange(strand_min_off_time, strand_max_off_time)
+            next_strand_clock = clock + random.randrange(STRAND_MIN_OFF_TIME, STRAND_MAX_OFF_TIME)
             strand_blink_count = 0
 
         # Handling blinking the light
@@ -136,7 +137,7 @@ while True:
 
     # Adjust location if clock is expired
     if clock > next_move_clock:
-        next_move_clock = clock + random.randrange(move_frequency_min, move_frequency_max)
+        next_move_clock = clock + random.randrange(MOVE_FREQUENCY_MIN, MOVE_FREQUENCY_MAX)
 
         # Blank all the pixels
         strand_pixels.fill(OFF)
