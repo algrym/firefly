@@ -114,8 +114,7 @@ while True:
         next_stat_clock: int = clock + 10000
         if supervisor.runtime.serial_connected:
             print(
-                f" - Running {time.time() - start_time}s "
-                "at {loop_count / (time.time() - last_loop_time)} loops/second")
+                f" - Running {time.time() - start_time}s at {loop_count / (time.time() - last_loop_time)} loops/second")
         loop_count: int = 0
         last_loop_time = int(time.time())
 
@@ -157,6 +156,5 @@ while True:
 
         # Move the firefly
         if supervisor.runtime.serial_connected:
-            print(f'   - Moving cursor={strand_cursor} '
-                  'direction={strand_direction} max={len(strand_pixels)}')
+            print(f'   - Moving cursor={strand_cursor} direction={strand_direction} max={len(strand_pixels)}')
         strand_cursor = (strand_cursor + strand_direction) % len(strand_pixels)
