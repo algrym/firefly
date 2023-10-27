@@ -28,6 +28,7 @@ strand_blink_pattern = [50, 300, 100, 200, 50]
 strand_min_off_time: int = 1000
 strand_max_off_time: int = 2000
 strand_blink_max: int = 2
+strand_init_delay: float = 0.2
 
 # No user config below this point
 
@@ -95,7 +96,7 @@ if supervisor.runtime.serial_connected:
 for c in color_wheel:
     strand_pixels.fill(c)
     watch_dog.feed()
-    time.sleep(0.1)
+    time.sleep(strand_init_delay)
 strand_pixels.fill(OFF)
 
 if supervisor.runtime.serial_connected:
