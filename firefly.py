@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
-# Firefly.py - firefly class
+"""firefly.py - firefly class"""
 import random
 
 # Setup constants
-move_frequency_min: int = 500
-move_frequency_max: int = 5000
-on_time: float = 0.1
-min_off_time: int = 1000
-max_off_time: int = 2000
+MOVE_FREQUENCY_MIN: int = 500
+MOVE_FREQUENCY_MAX: int = 5000
+ON_TIME: float = 0.1
+MIN_OFF_TIME: int = 1000
+MAX_OFF_TIME: int = 2000
 
 OFF = (0, 0, 0)
 
 
-class Firefly:
+class FireFly:
+    """firefly.py - firefly class"""
     def __init__(self, strand_pixels, on_color, location_max):
-        self.next_move_clock = move_frequency_min
+        self.next_move_clock = MOVE_FREQUENCY_MIN
 
         # Copy arguments into instance attributes
         self.strand_pixels = strand_pixels
@@ -31,12 +32,16 @@ class Firefly:
         self.update(0)
 
     def move(self):
+        """move the firefly to a new location in the right direction"""
         self.strand_pixels[self.location] = OFF
         self.location += (self.direction % self.location_max)
 
     def update(self, clock):
+        """increment internal clocks and bounds-check"""
         if clock > self.next_move_clock:
-            self.next_move_clock = clock + random.randrange(self.move_frequency_min, self.move_frequency_maxo)
+            self.next_move_clock = \
+                clock + random.randrange(MOVE_FREQUENCY_MIN,
+                                         MOVE_FREQUENCY_MAX)
             self.move()
 
         # Ensure location is within bounds, and direction is facing the right way

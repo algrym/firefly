@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-# code.py
-# """python code to drive proton pack hardware"""
+"""code.py - python code to drive proton pack hardware"""
 import atexit
 import random
 import time
@@ -16,10 +15,11 @@ import watchdog
 import version
 
 # Config variables
-strand_pin = board.A0
-strand_length: int = 50
-strand_brightness: float = 0.1
-brightness_levels = (0.25, 0.3, 0.15)  # balance the colors better so white doesn't appear blue-tinged
+STRAND_PIN = board.A0
+STRAND_LENGTH: int = 50
+STRAND_BRIGHTNESS: float = 0.1
+# balance the colors better so white doesn't appear blue-tinged
+BRIGHTNESS_LEVELS = (0.25, 0.3, 0.15)
 
 # Length of various timers
 # Integers are in microseconds (1000ths)
@@ -38,21 +38,22 @@ if supervisor.runtime.serial_connected:
     print(f" - Adafruit FancyLed v{fancyled.__version__}")
 
 # Color constants
-RED = fancyled.gamma_adjust(fancyled.CRGB(255, 0, 0), brightness=brightness_levels).pack()
-ORANGE = fancyled.gamma_adjust(fancyled.CRGB(255, 165, 0), brightness=brightness_levels).pack()
-YELLOW = fancyled.gamma_adjust(fancyled.CRGB(255, 255, 0), brightness=brightness_levels).pack()
-GREEN = fancyled.gamma_adjust(fancyled.CRGB(0, 255, 0), brightness=brightness_levels).pack()
-FIREFLY_GREEN = fancyled.gamma_adjust(fancyled.CRGB(150, 255, 100), brightness=brightness_levels).pack()
-BLUE = fancyled.gamma_adjust(fancyled.CRGB(0, 0, 255), brightness=brightness_levels).pack()
-PURPLE = fancyled.gamma_adjust(fancyled.CRGB(128, 0, 128), brightness=brightness_levels).pack()
-WHITE = fancyled.gamma_adjust(fancyled.CRGB(255, 255, 255), brightness=brightness_levels).pack()
+RED = fancyled.gamma_adjust(fancyled.CRGB(255, 0, 0), brightness=BRIGHTNESS_LEVELS).pack()
+ORANGE = fancyled.gamma_adjust(fancyled.CRGB(255, 165, 0), brightness=BRIGHTNESS_LEVELS).pack()
+YELLOW = fancyled.gamma_adjust(fancyled.CRGB(255, 255, 0), brightness=BRIGHTNESS_LEVELS).pack()
+GREEN = fancyled.gamma_adjust(fancyled.CRGB(0, 255, 0), brightness=BRIGHTNESS_LEVELS).pack()
+FIREFLY_GREEN = fancyled.gamma_adjust(
+    fancyled.CRGB(150, 255, 100), brightness=BRIGHTNESS_LEVELS).pack()
+BLUE = fancyled.gamma_adjust(fancyled.CRGB(0, 0, 255), brightness=BRIGHTNESS_LEVELS).pack()
+PURPLE = fancyled.gamma_adjust(fancyled.CRGB(128, 0, 128), brightness=BRIGHTNESS_LEVELS).pack()
+WHITE = fancyled.gamma_adjust(fancyled.CRGB(255, 255, 255), brightness=BRIGHTNESS_LEVELS).pack()
 OFF = (0, 0, 0)
 
 color_wheel = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, WHITE]
 
 
 def all_off():
-    # callback to turn everything off on exit
+    """callback to turn everything off on exit"""
     if supervisor.runtime.serial_connected:
         print(' - Watchdog: standing down.')
     watch_dog.deinit()
@@ -76,10 +77,10 @@ atexit.register(all_off)
 led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT
 
-# setup strand NEOPIXELs
+# setup Neopixel strand
 if supervisor.runtime.serial_connected:
-    print(f' - NeoPixel strand size {strand_length} on {strand_pin}')
-strand_pixels = neopixel.NeoPixel(strand_pin, strand_length)
+    print(f' - NeoPixel strand size {STRAND_LENGTH} on {STRAND_PIN}')
+strand_pixels = neopixel.NeoPixel(STRAND_PIN, STRAND_LENGTH)
 
 # Initialize counters and clocks
 next_move_clock: int = 0
@@ -113,7 +114,8 @@ while True:
         next_stat_clock: int = clock + 10000
         if supervisor.runtime.serial_connected:
             print(
-                f" - Running {time.time() - start_time}s at {loop_count / (time.time() - last_loop_time)} loops/second")
+                f" - Running {time.time() - start_time}s "
+                "at {loop_count / (time.time() - last_loop_time)} loops/second")
         loop_count: int = 0
         last_loop_time = int(time.time())
 
@@ -155,5 +157,6 @@ while True:
 
         # Move the firefly
         if supervisor.runtime.serial_connected:
-            print(f'   - Moving cursor={strand_cursor} direction={strand_direction} max={len(strand_pixels)}')
+            print(f'   - Moving cursor={strand_cursor} '
+                  'direction={strand_direction} max={len(strand_pixels)}')
         strand_cursor = (strand_cursor + strand_direction) % len(strand_pixels)
