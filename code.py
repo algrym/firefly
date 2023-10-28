@@ -56,19 +56,13 @@ def all_off():
     """callback to turn everything off on exit"""
     if supervisor.runtime.serial_connected:
         print(' - Watchdog: standing down.')
+    watch_dog = microcontroller.watchdog
     watch_dog.deinit()
     if supervisor.runtime.serial_connected:
         print(' - Exiting: setting all pixels off.')
     neopixel.NeoPixel(STRAND_PIN, STRAND_LENGTH).fill(OFF)
     supervisor.reload()
 
-
-# Setup hardware watchdog in case things go wrong
-watch_dog = microcontroller.watchdog
-watch_dog.timeout = 5
-watch_dog.mode = watchdog.WatchDogMode.RESET
-if supervisor.runtime.serial_connected:
-    print(f' - Watchdog: feed me every {watch_dog.timeout} seconds or face {watch_dog.mode}')
 
 # turn everything off on exit
 atexit.register(all_off)
@@ -91,6 +85,13 @@ def main_event_loop():
     # setup onboard LED
     led = digitalio.DigitalInOut(board.LED)
     led.direction = digitalio.Direction.OUTPUT
+
+    # Setup hardware watchdog in case things go wrong
+    watch_dog = microcontroller.watchdog
+    watch_dog.timeout = 5
+    watch_dog.mode = watchdog.WatchDogMode.RESET
+    if supervisor.runtime.serial_connected:
+        print(f' - Watchdog: feed me every {watch_dog.timeout} seconds or face {watch_dog.mode}')
 
     # setup Neopixel strand
     if supervisor.runtime.serial_connected:
