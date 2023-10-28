@@ -125,13 +125,15 @@ def main_event_loop():
 
     while True:
         clock = local_supervisor.ticks_ms()
-        watch_dog.feed()
-        led.value = not led.value
         loop_count += 1
 
         # Print the average runs per second ever 10secs
         if clock > next_stat_clock:
             next_stat_clock: int = clock + 10000
+
+            watch_dog.feed()
+            led.value = not led.value
+
             if supervisor.runtime.serial_connected:
                 print(
                     f" - Running {time.time() - start_time}s at {loop_count / (time.time() - last_loop_time)} loops/second")
@@ -140,6 +142,9 @@ def main_event_loop():
 
         # Flicker pixels if clock is expired
         if clock > next_strand_clock:
+            watch_dog.feed()
+            led.value = not led.value
+
             # If there's still blink pattern to use, do so.
             #  Otherwise reset
             if strand_blink_count < len(STRAND_BLINK_PATTERN):
@@ -158,6 +163,9 @@ def main_event_loop():
 
         # Adjust location if clock is expired
         if clock > next_move_clock:
+            watch_dog.feed()
+            led.value = not led.value
+
             next_move_clock = clock + random.randrange(MOVE_FREQUENCY_MIN, MOVE_FREQUENCY_MAX)
 
             # Blank all the pixels
