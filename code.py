@@ -120,8 +120,11 @@ def main_event_loop():
     if supervisor.runtime.serial_connected:
         print(' - Entering main event loop.')
 
+    # Local vars are cheaper to access than global ones
+    local_supervisor = supervisor
+
     while True:
-        clock = supervisor.ticks_ms()
+        clock = local_supervisor.ticks_ms()
         watch_dog.feed()
         led.value = not led.value
         loop_count += 1
@@ -132,7 +135,7 @@ def main_event_loop():
             if supervisor.runtime.serial_connected:
                 print(
                     f" - Running {time.time() - start_time}s at {loop_count / (time.time() - last_loop_time)} loops/second")
-            loop_count: int = 0
+            loop_count = 0
             last_loop_time = int(time.time())
 
         # Flicker pixels if clock is expired
