@@ -1,6 +1,6 @@
 # 
-# Firefly Makefile for huzzah32
-# 
+# Firefly Makefile
+#
 # https://docs.circuitpython.org/en/latest/docs/workflows.html#get
 #
 
@@ -17,8 +17,9 @@ CPPORT := $(if $(CPPORT),$(CPPORT),/dev/tty.usbserial-*)
 # Comment out if you don't want to see curl activity
 VERBOSE := $(if $(VERBOSE), $(VERBOSE),)
 
-# Flags for esptool.py
+# Flags for various tools
 ESPTOOL_FLAGS=--port /dev/tty.usbserial-*
+RSYNC_FLAGS=-avlcC --progress
 
 # information for downloads
 CIRCUIT_PYTHON_BOARD=adafruit_feather_huzzah32
@@ -29,11 +30,17 @@ CIRCUIT_PYTHON_EXT=bin
 CIRCUIT_PYTHON_VER=8.2.7
 CIRCUIT_PYTHON_LIB_VER=8.x
 CIRCUIT_PYTHON_LIB_DATE=20231024
+CIRCUIT_PYTHON_DIR=/Volumes/PI_PICO_W/
+CIRCUIT_PYTHON_LIB_DIR=$(CIRCUIT_PYTHON_DIR)lib/
 
+# For web workflow use install-serial
+#all: .gitignore install-serial
+# For file workflow use install-rsync
+#all: .gitignore install-rsync
+all: .gitignore install-rsync
 # No config below this line
-all: install .gitignore
 
-install: .install-version.py .install-boot.py .install-code.py .install-firefly.py
+install-serial: .install-version.py .install-boot.py .install-code.py .install-firefly.py
 
 version.py: code.py firefly.py
 	date -r code.py "+__version__ = %'%Y-%m-%d %H:%M:%S%'" > version.py
@@ -42,6 +49,13 @@ version.py: code.py firefly.py
 	curl $(VERBOSE) -u :$(CIRCUITPY_WEB_API_PASSWORD) --create-dirs --location --location-trusted \
 		--upload-file $< $(CPURL)/fs/$< \
 	  	&& touch $(@)
+
+install-rsync: version.py code.py boot.py downloads
+	rsync $(RSYNC_FLAGS) version.py code.py boot.py $(CIRCUIT_PYTHON_DIR)
+	rsync $(RSYNC_FLAGS) \
+		downloads/adafruit-circuitpython-bundle-$(CIRCUIT_PYTHON_LIB_VER)-mpy-$(CIRCUIT_PYTHON_LIB_DATE)/lib/neopixel* \
+		downloads/adafruit-circuitpython-bundle-$(CIRCUIT_PYTHON_LIB_VER)-mpy-$(CIRCUIT_PYTHON_LIB_DATE)/lib/*adafruit_fancyled* \
+			$(CIRCUIT_PYTHON_LIB_DIR)
 
 install-wipe-huzzah32:
 	esptool.py ${ESPTOOL_FLAGS} erase_flash
