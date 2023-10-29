@@ -9,11 +9,12 @@ ON_TIME: float = 0.1
 MIN_OFF_TIME: int = 1000
 MAX_OFF_TIME: int = 2000
 
-OFF = (0, 0, 0)
+OFF = 0
 
 
 class FireFly:
     """firefly.py - firefly class"""
+
     def __init__(self, strand_pixels, on_color, location_max):
         self.next_move_clock = MOVE_FREQUENCY_MIN
 
