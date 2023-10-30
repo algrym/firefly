@@ -56,8 +56,6 @@ def all_off():
     """callback to turn everything off on exit"""
     if supervisor.runtime.serial_connected:
         print(' - Watchdog: standing down.')
-    watch_dog = microcontroller.watchdog
-    watch_dog.deinit()
     if supervisor.runtime.serial_connected:
         print(' - Exiting: setting all pixels off.')
     neopixel.NeoPixel(STRAND_PIN, STRAND_LENGTH).fill(OFF)
