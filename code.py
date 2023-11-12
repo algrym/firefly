@@ -86,7 +86,7 @@ def main_event_loop():
 
     # Setup hardware watchdog in case things go wrong
     watch_dog = microcontroller.watchdog
-    watch_dog.timeout = 5
+    watch_dog.timeout = 8       # Hardware maximum of 8 secs
     watch_dog.mode = watchdog.WatchDogMode.RESET
     if supervisor.runtime.serial_connected:
         print(f' - Watchdog: feed me every {watch_dog.timeout} seconds or face {watch_dog.mode}')
@@ -96,13 +96,13 @@ def main_event_loop():
         print(f' - NeoPixel strand size {STRAND_LENGTH} on {STRAND_PIN}')
     strand_pixels = neopixel.NeoPixel(STRAND_PIN, STRAND_LENGTH)
 
-    if supervisor.runtime.serial_connected:
-        print(' - Running LED test.')
-    for c in color_wheel:
-        strand_pixels.fill(c)
-        watch_dog.feed()
-        time.sleep(STRAND_INIT_DELAY)
-    strand_pixels.fill(OFF)
+    #if supervisor.runtime.serial_connected:
+    #    print(' - Running LED test.')
+    #for c in color_wheel:
+    #    strand_pixels.fill(c)
+    #    watch_dog.feed()
+    #    time.sleep(STRAND_INIT_DELAY)
+    #strand_pixels.fill(OFF)
 
     # Initialize counters and clocks
     next_move_clock: int = 0
