@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""code.py - python code to drive proton pack hardware"""
+""" code.py for github.com/algrym/firefly """
 import atexit
 import random
 import time
