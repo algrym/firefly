@@ -19,18 +19,18 @@ VERBOSE := $(if $(VERBOSE), $(VERBOSE),)
 
 # Flags for various tools
 ESPTOOL_FLAGS=--port /dev/tty.usbserial-*
-RSYNC_FLAGS=-avlcC --progress
+RSYNC_FLAGS=-avlcC --progress --delete-before
 
 # information for downloads
 CIRCUIT_PYTHON_BOARD=adafruit_feather_huzzah32
 #   use "bin" for serial installs like ESP32
 #   use "uf2" for filesystem installs like Pi Pico
-#CIRCUIT_PYTHON_EXT=uf2
-CIRCUIT_PYTHON_EXT=bin
-CIRCUIT_PYTHON_VER=8.2.7
+#CIRCUIT_PYTHON_EXT=bin
+CIRCUIT_PYTHON_EXT=uf2
+CIRCUIT_PYTHON_VER=8.2.8
 CIRCUIT_PYTHON_LIB_VER=8.x
-CIRCUIT_PYTHON_LIB_DATE=20231024
-CIRCUIT_PYTHON_DIR=/Volumes/PI_PICO_W/
+CIRCUIT_PYTHON_LIB_DATE=20231130
+CIRCUIT_PYTHON_DIR=/Volumes/CIRCUITPY/
 CIRCUIT_PYTHON_LIB_DIR=$(CIRCUIT_PYTHON_DIR)lib/
 
 # For web workflow use install-serial
